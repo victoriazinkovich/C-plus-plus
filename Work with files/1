@@ -1,0 +1,52 @@
+#include <exception>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <string>
+
+
+void clean_file(const std::string & path)
+{
+    std::fstream fout(path, std::ios::out);
+
+    if (!fout)
+    {
+        std::cerr << "Can't clean. " << "Path " << path << " does not exist.\n" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+void print_file(const std::string & path)
+{
+    std::fstream fin(path, std::ios::in);
+
+    if (!fin)
+    {
+        std::cerr << "Can't print. " << "Path " << path << " does not exist.\n" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << fin.rdbuf();
+}
+
+
+int main() 
+{
+    std::string parent_path = "C:/Users/vikto/source/repos/MIPT_cplusplus/";
+    std::string filename = "text.txt";
+    std::string path = parent_path + filename;
+
+    std::cout << "File BEFORE cleaning: " << std::endl;
+    print_file(path);
+
+    clean_file(path);
+    std::cout << "\n" << '\n';
+
+    std::cout << "File AFTER cleaning: " << std::endl;
+    print_file(path);
+    
+    system("pause");
+
+    return EXIT_SUCCESS;
+}
