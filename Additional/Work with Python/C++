@@ -1,0 +1,50 @@
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <vector>
+
+
+int main()
+{
+    std::vector < int > v_sort;
+    std::vector < int > v_nth;
+
+    int comparisons_sort = 0;
+    int comparisons_nth = 0;
+
+    std::ofstream out("C:\\Users\\vikto\\OneDrive\\Документы\\Visual Studio 2019\\Code Snippets\\Visual C++\\My Code Snippets\\Project3\\data.txt");
+
+    for (auto N = 1000; N < 20000; N += 1000)
+    {
+        v_sort.reserve(N);
+        v_nth.reserve(N);
+
+        for (auto i = N; 0 < i; --i)
+        {
+            v_sort.push_back(i);
+            v_nth.push_back(i);
+        }
+
+        std::sort(std::begin(v_sort), std::end(v_sort),
+            [&comparisons_sort](unsigned int lhs, unsigned int rhs)
+            {
+                ++comparisons_sort;
+                return lhs < rhs;
+            });
+
+        std::nth_element(std::begin(v_nth), std::prev(std::end(v_nth), floor(N / 2)), std::end(v_nth),
+            [&comparisons_nth](unsigned int lhs, unsigned int rhs)
+            {
+                ++comparisons_nth;
+                return lhs < rhs;
+            });
+
+        if (out.is_open())
+        {
+            out << N << " " << comparisons_sort << " " << comparisons_nth << "\n";
+        }
+    }
+
+    out.close();
+}
