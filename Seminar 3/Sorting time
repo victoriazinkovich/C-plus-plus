@@ -1,0 +1,129 @@
+#include <algorithm>
+#include <utility>
+#include <array>
+#include <vector>
+#include <set>
+#include <iomanip>
+#include <iostream>
+#include <chrono>
+
+
+class Timer
+{
+public:
+    using clock_t = std::chrono::steady_clock;
+    using time_point_t = clock_t::time_point;
+    Timer() : m_begin(clock_t::now()), m_gap(0) {}
+
+    ~Timer()
+    {
+        auto end = clock_t::now();
+        //std::cout << "micro: " << std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count() + m_gap << std::endl;
+    }
+
+private:
+    time_point_t m_begin;
+    long long m_gap;
+
+
+public:
+    void pause()
+    {
+        auto end = clock_t::now();
+        auto gap = std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count();
+        m_gap += gap;
+    }
+
+    void play()
+    {
+        m_begin = clock_t::now();
+    }
+
+    auto time()
+    {
+        auto end = clock_t::now();
+        auto gap = std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count();
+        return gap;
+    }
+};
+
+
+
+int main()
+{
+    int tests = 100;
+
+    std::size_t N = 2000;
+    int sequence[2000];
+    for (auto i = N; i > 0; --i)
+    {
+        sequence[N - i] = i;
+    }
+
+
+    auto final_time_set = 0;
+    for (auto i = tests; i > 0; --i)
+    {
+        Timer t;
+
+        std::set < int > set;
+
+        set.insert(std::begin(sequence), std::end(sequence));
+
+        auto test = t.time();
+
+        final_time_set += test;
+    }
+    std::cout << "Time of set sorting, " << final_time_set / tests << std::endl;
+
+
+    auto final_time_v = 0;
+    for (auto i = tests; i > 0; --i)
+    {
+        Timer t;
+
+        std::vector < int > v(std::begin(sequence), std::end(sequence));
+
+        std::sort(std::begin(v), std::end(v));
+
+        auto test = t.time();
+
+        final_time_v += test;
+    }
+    std::cout << "Time of vector sorting, " << final_time_v / tests << std::endl;
+
+
+    auto final_time_arr = 0;
+    for (auto i = tests; i > 0; --i)
+    {
+        Timer t;
+
+        std::array  < int, 2000 > arr;
+
+        for (auto j = N; j > 0; --j)
+        {
+            arr[N - j] = j;
+        }
+
+        std::sort(std::begin(arr), std::end(arr));
+
+        auto test = t.time();
+
+        final_time_arr += test;
+    }
+    std::cout << "Time of array sorting, " << final_time_arr / tests << std::endl;
+
+
+    if (final_time_arr < final_time_set && final_time_arr < final_time_v)
+    {
+        std::cout << "The best is array with time " << final_time_arr / tests << std::endl;
+    }
+    else if (final_time_set < final_time_v && final_time_arr < final_time_v)
+    {
+        std::cout << "The best is set with time " << final_time_set / tests << std::endl;
+    }
+    else
+    {
+        std::cout << "The best is vector with time " << final_time_v / tests << std::endl;
+    }
+}
