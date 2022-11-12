@@ -1,0 +1,105 @@
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <iostream>
+#include <iterator>
+#include <cmath>
+#include <future>
+#include <mutex>
+#include <numeric>
+#include <random>
+#include <vector>
+#include <thread>
+#include <utility>
+
+
+class Timer
+{
+public:
+	using clock_t = std::chrono::steady_clock;
+	using time_point_t = clock_t::time_point;
+	Timer() : m_begin(clock_t::now()), m_gap(0) {}
+
+	~Timer()
+	{
+		auto end = clock_t::now();
+		std::cout << "micro: " << std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count() + m_gap << std::endl;
+	}
+
+private:
+	time_point_t m_begin;
+	long long m_gap;
+
+
+public:
+	void pause()
+	{
+		auto end = clock_t::now();
+		auto gap = std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count();
+		m_gap += gap;
+	}
+
+	void play()
+	{
+		m_begin = clock_t::now();
+	}
+};
+
+
+template < typename Iterator, typename T >
+T count_round(Iterator first, Iterator last, T result)
+{
+	const std::size_t length = std::distance(first, last);
+
+	const std::size_t max_size = 1'000'000 / 8;
+
+	if (length <= max_size)
+	{
+		return std::count_if(first, last, [](auto element) {
+			return (std::pow(std::abs(element.first - 0.05), 2) +
+				std::pow(std::abs(element.second - 0.05), 2) <= std::pow(0.05, 2));
+			}
+		);
+	}
+	else
+	{
+		Iterator middle = first;
+		std::advance(middle, length / 2);
+
+		std::future < T > first_half_result =
+			std::async(count_round < Iterator, T >, first, middle, result);
+
+		T second_half_result = count_round(middle, last, T());
+
+		return first_half_result.get() + second_half_result;
+	}
+}
+
+
+int main(int argc, char ** argv)
+{
+	std::mt19937 mt;
+	std::uniform_real_distribution <> uid(0, 0.1);
+	auto N = 1'000'000;
+
+	std::vector < std::pair < double, double > > coordinats(N, std::make_pair(0, 0));
+	std::generate_n(std::begin(coordinats), N, [&mt, &uid]() {return std::make_pair(uid(mt), uid(mt)); });
+
+	unsigned long int M = 0;
+
+	{
+		Timer t;
+
+		std::atomic < int > dots(0);
+
+		M = count_round(std::begin(coordinats), std::end(coordinats), dots.load());
+
+		double pi = 4.0 * M / N;
+
+		std::cout << "pi: " << pi << std::endl;
+	}
+
+	system("pause");
+
+	return EXIT_SUCCESS;
+}
