@@ -1,0 +1,25 @@
+#include <iomanip>
+#include <iostream>
+#include <regex>
+#include <string>
+
+
+int main()
+{
+    std::string mails = "xxx@inform.mail.ru sssss first.last@gmail.com xxx@inform.mail.gmail.phystech.ru sssss xxx@inform.mail.phystech.ru hello@fd.ru3 sssss –spring-dancer@domain.com sssss autumn-dancer@domain.com sssss snowball.sweet@bell-atl.com";
+
+    std::regex mail_pattern(R"([[:alnum:]]+[-._[:alnum:]]*@(([[:alpha:]]+[-[:alpha:]]*\.){1,}[[:alpha:]]{2,}))");
+
+    std::sregex_iterator begin(mails.cbegin(), mails.cend(), mail_pattern);
+    std::sregex_iterator end;
+
+    std::for_each(begin, end, [](const std::smatch & m)
+        {
+            std::cout << "mail: " << m[0] << std::endl;
+            std::cout << "domain: " << m[1] << '\n' << std::endl;
+        });
+
+    system("pause");
+
+    return EXIT_SUCCESS;
+}
