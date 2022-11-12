@@ -1,0 +1,42 @@
+#include <exception>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+
+void print_line(const std::string &path, const int pos)
+{
+    std::fstream fin(path, std::ios::in);
+
+    if (!fin)
+    {
+        std::cerr << "Can't read. " << "Path " << path << " does not exist.\n" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    std::string s;
+    std::getline(fin, s);
+    std::size_t s_size = s.size();
+
+    fin.seekp((pos - 1) * (s_size + 2), std::ios::beg);
+    std::getline(fin, s);
+    std::cout  << s << std::endl;
+}
+
+
+int main()
+{
+    std::string parent_path = "C:/Users/vikto/source/repos/MIPT_cplusplus/";
+    std::string filename = "file.txt";
+    std::string path = parent_path + filename;
+
+    int pos;
+    std::cout << "Position of string in the file: ";
+    std::cin >> pos;
+
+    print_line(path, pos);
+
+    system("pause");
+
+    return EXIT_SUCCESS;
+}
