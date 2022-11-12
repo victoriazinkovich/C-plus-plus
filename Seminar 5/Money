@@ -1,0 +1,27 @@
+#include <codecvt>
+#include <iomanip>
+#include <iostream>
+#include <locale>
+#include <sstream>
+
+
+int main() 
+{
+    double euro;
+    std::cout << "The amount in euros: ";
+
+    std::locale locale_deu("de_DE.UTF-8");
+    std::cin.imbue(locale_deu);
+    std::cin >> euro;
+
+    double ruble = euro * 88.13;
+  
+    std::locale locale_rus("ru_RU.UTF-8");
+    std::cout.imbue(locale_rus);
+    std::cout << std::showbase << "The amount in rubles: " 
+        << std::put_money(ruble, true) << std::endl;
+
+    system("pause");
+
+    return EXIT_SUCCESS;
+}
