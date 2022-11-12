@@ -1,0 +1,189 @@
+#include <algorithm>
+#include <cmath>
+#include <chrono>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <numeric>
+#include <random>
+#include <sstream>
+#include <string>
+#include <vector>
+
+void print(const std::vector < int >& v)
+{
+    std::copy(std::begin(v), std::end(v), std::ostream_iterator < int >(std::cout, " "));
+    std::cout << '\n' << '\n';
+}
+
+bool is_prime(int x)
+{
+    if (x == 1)
+    {
+        return false;
+    }
+
+    for (auto i = 2; i < sqrt(x); i++) {
+        if (x % i == 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    // Ex1:
+    std::cout << "creating a sequence of 10 numbers: ";
+    std::vector < int > v(10);
+    std::iota(std::begin(v), std::end(v), 1);
+    print(v);
+
+
+    // Ex2:
+    std::cout << "adding several numbers from cin: ";
+    std::copy(std::istream_iterator < int >(std::cin),
+        std::istream_iterator < int >(),
+        std::back_inserter(v));
+
+    std::cout << "new sequence with added numbers: ";
+    print(v);
+
+
+    // Ex3:
+    std::cout << "mixing randomly: ";
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(std::begin(v), std::end(v), g);
+    print(v);
+
+
+    // Ex4:
+    std::cout << "deleting non-unique elements: ";
+    std::sort(std::begin(v), std::end(v));
+    v.erase(std::unique(std::begin(v), std::end(v)), std::end(v));
+    print(v);
+
+
+    // Ex5:
+    auto result = std::count_if(std::begin(v), std::end(v), [](auto x) { return x % 2 != 0; });
+    std::cout << "the amount of odd numbers in the first sequence: " << result << std::endl;
+    std::cout << '\n';
+
+
+    // Ex6:
+    auto [min, max] = std::minmax_element(std::begin(v), std::end(v));
+    std::cout << "minimum of the sequence: " << *min << "; maximum of the sequence: " << *max << std::endl;
+    std::cout << '\n';
+
+
+    // Ex7:
+    auto it = std::find_if(std::begin(v), std::end(v), [](auto x) {return is_prime(x); });
+    if (it != std::end(v))
+    {
+        std::cout << "prime number in the first sequence: " << *it << std::endl;;
+    }
+    else
+    {
+        std::cout << "there are no prime numbers in the first sequence" << std::endl;
+    }
+    std::cout << '\n';
+
+
+    // Ex8:
+    std::cout << "replacing numbers in the sequence by their squares: ";
+    std::transform(std::begin(v), std::end(v), std::begin(v), [](auto x) {return x * x; });
+    print(v);
+
+
+    // Ex9:
+    std::cout << "creating a random sequence with the same size as the first has: ";
+    std::vector < int > v1(std::size(v), 0);
+    std::default_random_engine dre(std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_int_distribution <> uid(1, 10);
+    std::generate_n(std::begin(v1), std::size(v), [&dre, &uid]() {return uid(dre); });
+    print(v1);
+
+
+    // Ex10:
+    auto sum = std::accumulate(std::begin(v1), std::end(v1), 0);
+    std::cout << "sum of the second sequence: " << sum << std::endl;
+    std::cout << '\n';
+
+
+    // Ex11:
+    std::cout << "replacing first numbers of the second sequence with 1: ";
+    std::fill_n(std::begin(v1), 3, 1);
+    print(v1);
+
+
+    // Ex12:
+    std::cout << "difference of the first and the second sequences: ";
+    std::vector < int > v2;
+    std::transform(std::begin(v), std::end(v), std::begin(v1), std::back_inserter(v2), std::minus<>());
+    print(v2);
+
+
+    // Ex13:
+    std::cout << "sequence 3 with negative numbers: ";
+    print(v2);
+
+    std::replace_if(std::begin(v2), std::end(v2), [](auto x) {return x < 0; }, 0);
+
+    std::cout << "sequence 3 without negative numbers: ";
+    print(v2);
+
+
+    // Ex14:
+    std::cout << "deleting numbers that equals zero in the third sequence: ";
+    v2.erase(std::remove_if(std::begin(v2), std::end(v2), [](auto x) {return x == 0; }), std::end(v2));
+    print(v2);
+
+
+    // Ex15:
+    std::cout << "reversing the order of the third sequence: ";
+    std::reverse(std::begin(v2), std::end(v2));
+    print(v2);
+
+
+    // Ex16:
+    v2.push_back(-1);
+    v2.push_back(-7);
+    v2.push_back(15);
+    v2.push_back(13);
+    v2.push_back(9);
+
+    std::cout << "TOP-3 max elements in the third sequence: ";
+    std::nth_element(std::begin(v2), std::prev(std::end(v2), 3), std::end(v2));
+
+    for (auto i = 3U; i > 0; --i)
+    {
+        std::cout << v2[v2.size() - i] << " ";
+    }
+    std::cout << '\n' << '\n';
+
+
+    // Ex17:
+    std::cout << "sorting the first sequence: ";
+    std::sort(std::begin(v1), std::end(v1));
+    print(v1);
+
+    std::cout << "sorting the second sequence: ";
+    std::sort(std::begin(v2), std::end(v2));
+    print(v2);
+
+
+    // Ex18:
+    std::cout << "union of the first and the second sequences: ";
+    std::vector < int > v3;
+
+    std::merge(std::begin(v1), std::end(v1), std::begin(v2), std::end(v2), std::back_inserter(v3));
+    print(v3);
+
+
+    // Ex19:
+    auto [lower, upper] = std::equal_range(std::begin(v3), std::end(v3), 1);
+    std::cout << "diapason to insert 1 is:  [" << std::distance(std::begin(v3), lower) - 1
+        << ", " << std::distance(std::begin(v3), upper) << "]" << std::endl << '\n';
+}
