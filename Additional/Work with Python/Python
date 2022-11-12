@@ -1,0 +1,25 @@
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+
+data = []
+N = []
+sort = []
+nth = []
+
+with open("C:\\Users\\vikto\\OneDrive\\Документы\\Visual Studio 2019\\Code Snippets\\Visual C++\\My Code Snippets\\Project3\\data.txt") as f:
+    for line in f:
+        data.append([float(x) for x in line.split()])
+
+for i in range(len(data)):
+    N.append(data[i][0])
+    sort.append(data[i][1])
+    nth.append(data[i][2])
+
+plt.scatter(N, sort)
+plt.scatter(N, nth)
+
+plt.plot(N, sort)
+plt.plot(N, nth)
+
+plt.show()
