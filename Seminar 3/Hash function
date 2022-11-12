@@ -1,0 +1,27 @@
+#include <vector>
+#include <string>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+
+int hash(double key, int N, int h)
+{
+	double new_key = key - floor(key);
+
+	return (int(floor(new_key * N))) % h;
+}
+
+
+int main()
+{
+	int N = 197;     // size of the table
+	int h = 31;      // prime number for hash
+
+	double keys[5] = { 1.39, 15.92, 0.232, 2226.238, 11.212 };
+
+	for (const auto& key : keys)
+	{
+		std::cout << std::left << std::setw(15) << "Hash code for "
+			<< std::left << std::setw(10) << key << " is: " << hash(key, N, h) << std::endl;
+	}
+}
