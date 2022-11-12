@@ -1,0 +1,126 @@
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <thread>
+#include <utility>
+
+#define BOOST_DATE_TIME_NO_LIB
+#define BOOST_REGEX_NO_LIB
+
+#include <boost/asio.hpp>
+
+class Chat
+{
+public:
+
+    explicit Chat(const std::string & user_name) : m_user_name(user_name), m_exit_flag(false)
+    {
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address_v4::any(), port);
+
+        boost::asio::io_service io_service;
+
+        try
+        {
+            boost::asio::ip::tcp::acceptor acceptor(io_service, endpoint.protocol());
+
+            acceptor.bind(endpoint);
+
+            acceptor.listen(size);
+
+            boost::asio::ip::tcp::socket socket(io_service);
+
+            acceptor.accept(socket);
+
+            run(socket);
+        }
+        catch (boost::system::system_error & e)
+        {
+            std::cout << "Error occured! Error code = " << e.code() << ". Message: " << e.what() << std::endl;
+        }
+    }
+
+    ~Chat() noexcept = default;
+
+private:
+
+    void run(boost::asio::ip::tcp::socket & socket)
+    {
+        auto reader = std::thread(&Chat::read_data_until, this, std::ref(socket));
+
+        write_data(socket);
+
+        m_exit_flag = true;
+
+        boost::asio::write(socket, boost::asio::buffer("exit!"));
+
+        reader.join();
+    }
+
+    void write_data(boost::asio::ip::tcp::socket & socket)
+    {
+        std::string message;
+
+        while (true)
+        {
+            std::getline(std::cin, message);
+
+            if (message == "exit!")
+            {
+                break;
+            }
+
+            boost::asio::write(socket, boost::asio::buffer(m_user_name + ": " + message));
+        }
+    }
+
+    void read_data_until(boost::asio::ip::tcp::socket & socket)
+    {
+        while (true)
+        {
+            boost::asio::streambuf buffer;
+
+            boost::asio::read_until(socket, buffer, '!');
+
+            std::string message;
+
+            std::istream input_stream(&buffer);
+            std::getline(input_stream, message, '!');
+
+            if (message == "exit")
+            {
+                break;
+            }
+
+            std::cout << message << std::endl;
+        }
+    }
+
+private:
+
+    const std::size_t size = 30;
+
+    int port = 3333;
+
+private:
+
+    std::string m_user_name;
+
+    bool m_exit_flag;
+};
+
+int main(int argc, char ** argv)
+{
+    system("chcp 1251");
+
+    std::string user_name;
+
+    std::cout << "Enter your name: ";
+
+    std::getline(std::cin, user_name);
+
+    Chat client(user_name);
+
+    system("pause");
+
+    return EXIT_SUCCESS;
+}
