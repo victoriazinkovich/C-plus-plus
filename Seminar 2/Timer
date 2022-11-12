@@ -1,0 +1,81 @@
+#include <iostream>
+#include <chrono>
+#include <vector>
+#include <algorithm>
+
+
+class Timer
+{
+public:
+    using clock_t = std::chrono::steady_clock;
+    using time_point_t = clock_t::time_point;
+    Timer() : m_begin(clock_t::now()), m_gap(0) {}
+
+    ~Timer()
+    {
+        auto end = clock_t::now();
+        std::cout << "micro: " << std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count() + m_gap << std::endl;
+    }
+
+private:
+    time_point_t m_begin;
+    long long m_gap;
+    
+    
+public:
+    void pause()
+    {
+        auto end = clock_t::now();
+        auto gap = std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count();
+        m_gap += gap;
+    }
+    
+    void play()
+    {
+        m_begin = clock_t::now();
+    }
+
+};
+
+
+int main() {
+    
+    std::vector < int > v;
+    std::vector < int > v1;
+    std::vector < int > v2;
+    std::vector < int > v3;
+    std::vector < int > v4;
+
+    v.reserve(10000);
+    v1.reserve(10000);
+    v2.reserve(10000);
+    v3.reserve(10000);
+    v4.reserve(10000);
+    
+    for (auto i = 10000; i >= 0; --i)
+    {
+        v.push_back(i);
+        v1.push_back(i);
+        v2.push_back(i);
+        v3.push_back(i);
+        v4.push_back(i);
+    }
+
+    Timer t;
+
+    std::sort(std::begin(v), std::end(v));
+    
+    t.pause();
+    std::sort(std::begin(v1), std::end(v1));
+    t.play();
+    
+    std::sort(std::begin(v2), std::end(v2));
+    
+    t.pause();
+    std::sort(std::begin(v3), std::end(v3));
+    t.play();
+    
+    std::sort(std::begin(v4), std::end(v4));
+    
+    return 0;
+}
