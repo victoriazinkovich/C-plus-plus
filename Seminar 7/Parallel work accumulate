@@ -1,0 +1,108 @@
+#include <algorithm>
+#include <chrono>
+#include <iostream>
+#include <iterator>
+#include <cmath>
+#include <numeric>
+#include <random>
+#include <vector>
+#include <thread>
+#include <utility>
+
+
+class Timer
+{
+public:
+    using clock_t = std::chrono::steady_clock;
+    using time_point_t = clock_t::time_point;
+    Timer() : m_begin(clock_t::now()), m_gap(0) {}
+
+    ~Timer()
+    {
+        auto end = clock_t::now();
+        std::cout << std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count() + m_gap << std::endl;
+    }
+
+private:
+    time_point_t m_begin;
+    long long m_gap;
+
+
+public:
+    void pause()
+    {
+        auto end = clock_t::now();
+        auto gap = std::chrono::duration_cast <std::chrono::microseconds> (end - m_begin).count();
+        m_gap += gap;
+    }
+
+    void play()
+    {
+        m_begin = clock_t::now();
+    }
+};
+
+
+template < typename Iterator, typename T >
+struct accumulate_block
+{
+    void operator()(Iterator first, Iterator last, T & result)
+    {
+        result = std::accumulate(first, last, result); // !
+    }
+};
+
+
+template < typename Iterator, typename T >
+T parallel_accumulate(Iterator first, Iterator last, T init, int num_threads)
+{
+    const std::size_t length = std::distance(first, last);
+
+    if (!length)
+        return init;
+
+    const std::size_t block_size = length / num_threads;
+
+    std::vector < T > results(num_threads);
+    std::vector < std::thread > threads(num_threads);
+
+    Iterator block_start = first;
+
+    for (std::size_t i = 0; i < num_threads; ++i)
+    {
+        Iterator block_end = block_start;
+        std::advance(block_end, block_size);
+
+        threads[i] = std::thread(
+            accumulate_block < Iterator, T > (),
+            block_start, block_end, std::ref(results[i]));
+
+        block_start = block_end;
+    }
+
+    accumulate_block < Iterator, T > ()(block_start, last, results[num_threads - 1]);
+
+    std::for_each(threads.begin(), threads.end(),
+        std::mem_fn(&std::thread::join));
+
+    return std::accumulate(results.begin(), results.end(), init);
+}
+
+
+int main(int argc, const char * argv[])
+{
+    std::vector < int > v(1000000);
+    std::iota(v.begin(), v.end(), 1);
+
+    int num_threads = 500;
+    
+    for (auto i = 1U; i < num_threads; i += 10)
+    {
+        Timer t;
+        parallel_accumulate(std::begin(v), std::end(v), 0, i);
+        std::cout << i + 1 << " ";
+    }
+    
+    system("pause");
+    return EXIT_SUCCESS;
+}
