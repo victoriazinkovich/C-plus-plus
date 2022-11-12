@@ -1,0 +1,32 @@
+#include <algorithm>
+#include <iostream>
+#include <regex>
+#include <string>
+
+int main()
+{
+	std::string data = "One sunny 1992.02.22 day I was 2012.23.22 sad and 24:33:55 (12:33:44) 25:54:44 we2000.06.12ary for so23:54:44methi";
+
+	std::regex date_pattern(R"((\d{4})\.(0{1}[1-9]{1}|1{1}[0-2]{1})\.([0-2]{1}[1-9]{1}|[3]{1}[0-1]{1}))");
+	std::regex time_pattern(R"(([0-1]{1}\d{1}|2{1}[0-4]{1})\:([0-5]{1}\d{1})\:([0-5]{1}\d{1}))");
+
+	std::sregex_iterator d_begin(data.cbegin(), data.cend(), date_pattern);
+	std::sregex_iterator d_end;
+
+	std::cout << "Date in the text:" << std::endl;
+	std::for_each(d_begin, d_end, [](const std::smatch & m)
+		{
+			std::cout << m[0] << std::endl;
+		});
+
+	std::cout << '\n';
+
+	std::cout << "Time in the text:" << std::endl;
+	std::sregex_iterator t_begin(data.cbegin(), data.cend(), time_pattern);
+	std::sregex_iterator t_end;
+
+	std::for_each(t_begin, t_end, [](const std::smatch & m)
+		{
+			std::cout << m[0] << std::endl;
+		});
+}
