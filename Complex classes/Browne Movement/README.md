@@ -5,4 +5,4 @@
 3. Particles attract according to Coulomb's law. If the charge of the particles is made too large, all the particles will stick together at one point
 
 
-<img src="https://user-images.githubusercontent.com/78615928/213461962-f2a8d356-a7f9-425a-a002-dbed75c943c6.png" width="400" />
+![image](https://github.com/victoriazinkovich/C-plus-plus/assets/78615928/5275a46d-c50d-4aff-8b98-01bdb670ce30)
